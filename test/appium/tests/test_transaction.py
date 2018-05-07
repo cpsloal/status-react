@@ -186,15 +186,11 @@ class TestTransaction(SingleDeviceTestCase):
 
 @pytest.mark.all
 class TestTransactions(MultipleDeviceTestCase):
-    senders = dict()
-    senders['c_user'] = transaction_users_wallet['C_USER']
-    senders['d_user'] = transaction_users['D_USER']
-    senders['f_user'] = transaction_users['F_USER']
 
     @pytest.mark.pr
     def test_send_eth_to_request_in_group_chat(self):
         recipient = transaction_users['E_USER']
-        sender = self.senders['f_user']
+        sender = self.senders['f_user'] = transaction_users['F_USER']
         self.create_drivers(2)
         device_1, device_2 = SignInView(self.drivers[0]), SignInView(self.drivers[1])
         for user_details in (recipient, device_1), (sender, device_2):
@@ -223,7 +219,7 @@ class TestTransactions(MultipleDeviceTestCase):
     @pytest.mark.pr
     def test_send_eth_to_request_in_one_to_one_chat(self):
         recipient = transaction_users['C_USER']
-        sender = self.senders['d_user']
+        sender = self.senders['d_user'] = transaction_users['D_USER']
         self.create_drivers(2)
         device_1, device_2 = SignInView(self.drivers[0]), SignInView(self.drivers[1])
         for user_details in (recipient, device_1), (sender, device_2):
@@ -262,7 +258,7 @@ class TestTransactions(MultipleDeviceTestCase):
     @pytest.mark.pr
     def test_send_eth_to_request_from_wallet(self):
         recipient = transaction_users_wallet['D_USER']
-        sender = self.senders['c_user']
+        sender = self.senders['c_user'] = transaction_users['C_USER']
         self.create_drivers(2)
         device_1, device_2 = SignInView(self.drivers[0]), SignInView(self.drivers[1])
         for user_details in (recipient, device_1), (sender, device_2):
@@ -294,7 +290,3 @@ class TestTransactions(MultipleDeviceTestCase):
         device_2_chat.send_eth_to_request(request_button, sender['password'])
         api_requests.verify_balance_is_updated(initial_balance_recipient, recipient['address'])
 
-    def teardown_method(self, method):
-        for user in self.senders:
-            api_requests.faucet(address=self.senders[user]['address'])
-        super(TestTransactions, self).teardown_method(method)
